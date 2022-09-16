@@ -1,11 +1,14 @@
-#include "modes/extra/MultiVersus.hpp"
+#include "modes/extra/MultiVersusDiux.hpp"
 
 #define ANALOG_STICK_MIN 0
 #define ANALOG_STICK_NEUTRAL 128
 #define ANALOG_STICK_MAX 255
-#define USE_DPAD_TOGGLE 1
 
-MultiVersus::MultiVersus(socd::SocdType socd_type) : ControllerMode(socd_type) {
+#define DPAD_BUTTON_ON(x) inputs.nunchuk_c ? x : false
+#define DPAD_BUTTON_OFF(x) inputs.nunchuk_c ? false : x
+
+// My modification of Multiversus for LBX controller with a dpad toggle button
+MultiVersusDiux::MultiVersusDiux(socd::SocdType socd_type) : ControllerMode(socd_type) {
     _socd_pair_count = 4;
     _socd_pairs = new socd::SocdPair[_socd_pair_count]{
         socd::SocdPair{&InputState::left,    &InputState::right  },
@@ -15,46 +18,39 @@ MultiVersus::MultiVersus(socd::SocdType socd_type) : ControllerMode(socd_type) {
     };
 }
 
-void MultiVersus::UpdateDigitalOutputs(InputState &inputs, OutputState &outputs) {
+void MultiVersusDiux::UpdateDigitalOutputs(InputState &inputs, OutputState &outputs) {
+
+    // Attack
+    outputs.a = inputs.a;
+
+    // Special
+    outputs.b = inputs.b;
+
     // Bind X and Y to "jump" in-game.
     outputs.x = inputs.x;
     outputs.y = inputs.y;
 
-    outputs.start = !inputs.mod_y && inputs.start;
-
-    // Select, MS, or MY + Start for "Reset" in the Lab. Not supported by GameCube adapter.
-    outputs.select = inputs.select || inputs.midshield || (inputs.mod_y && inputs.start);
+    outputs.start = DPAD_BUTTON_OFF(inputs.start);
+    outputs.select = DPAD_BUTTON_ON(inputs.start);
 
     // Home not supported by GameCube adapter.
     outputs.home = inputs.home;
 
-    // L or Nunchuk Z = LT. Bind to "dodge" in-game.
-    if (inputs.nunchuk_connected) {
-        outputs.triggerLDigital = inputs.nunchuk_z;
-    } else {
-        outputs.triggerLDigital = inputs.l;
-    }
-
-    // R = RT. Can be bound to "pickup item" or left unbound.
+    outputs.triggerLDigital = inputs.l;
     outputs.triggerRDigital = inputs.r;
 
-#ifdef USE_DPAD_TOGGLE
-    if (!inputs.nunchuk_c) {
-#else
-    if (!inputs.mod_x) {
-#endif
-        // Bind A to "attack" in-game.
-        outputs.a = inputs.a;
+    // Bind A to "attack" in-game.
+    outputs.a = inputs.a;
 
-        // Bind B to "special" in-game.
-        outputs.b = inputs.b;
+    // Bind B to "special" in-game.
+    outputs.b = inputs.b;
 
-        // Z = RB. Bind to "dodge" in-game.
-        outputs.buttonR = inputs.z;
+    // Z = RB. Bind to "dodge" in-game.
+    outputs.buttonR = inputs.z;
 
-        // LS = LB. Not supported by GameCube adapter.
-        outputs.buttonL = inputs.lightshield;
-    }
+    // LS = LB. Not supported by GameCube adapter.
+    outputs.buttonL = inputs.lightshield;
+
 
     // MX activates a layer for "neutral" binds. Uses D-Pad buttons.
 #ifdef USE_DPAD_TOGGLE
@@ -84,7 +80,7 @@ void MultiVersus::UpdateDigitalOutputs(InputState &inputs, OutputState &outputs)
     }
 }
 
-void MultiVersus::UpdateAnalogOutputs(InputState &inputs, OutputState &outputs) {
+void MultiVersusDiux::UpdateAnalogOutputs(InputState &inputs, OutputState &outputs) {
     // Coordinate calculations to make modifier handling simpler.
     UpdateDirections(
         inputs.left,

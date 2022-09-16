@@ -8,6 +8,10 @@
 #include "modes/ProjectM.hpp"
 #include "modes/RivalsOfAether.hpp"
 #include "modes/Ultimate.hpp"
+#include "modes/extra/MultiVersus.hpp"
+#include "modes/extra/HollowKnight.hpp"
+#include "modes/extra/SteamSetup.hpp"
+#include "modes/extra/CultOfTheLamb.hpp"
 
 extern KeyboardMode *current_kb_mode;
 
@@ -43,6 +47,14 @@ void select_mode(CommunicationBackend *backend) {
             set_mode(backend, new FgcMode(socd::SOCD_NEUTRAL));
         } else if (inputs.b) {
             set_mode(backend, new RivalsOfAether(socd::SOCD_2IP));
+        } else if (inputs.a) {
+            set_mode(backend, new MultiVersus(socd::SOCD_2IP));
+        } else if (inputs.x) {
+            set_mode(backend, new HollowKnight(socd::SOCD_2IP));
+        } else if (inputs.z) {
+            set_mode(backend, new SteamSetup(socd::SOCD_2IP));
+        } else if (inputs.y) {
+            set_mode(backend, new CultOfTheLamb(socd::SOCD_2IP));
         }
     } else if (inputs.mod_y && !inputs.mod_x && inputs.start) {
         if (inputs.l) {

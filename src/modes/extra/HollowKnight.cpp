@@ -15,25 +15,29 @@ HollowKnight::HollowKnight(socd::SocdType socd_type) : ControllerMode(socd_type)
 }
 
 void HollowKnight::UpdateDigitalOutputs(InputState &inputs, OutputState &outputs) {
-    outputs.a = inputs.a; // Attack
-    outputs.b = inputs.b; // Dash
-    outputs.x = inputs.x; // Jump
-    outputs.y = inputs.mod_y; // Spell
-    outputs.triggerLDigital = inputs.r; // Focus/cast
-    outputs.triggerRDigital = inputs.z;
-    outputs.buttonR = inputs.up; // Dream nail
 
-    outputs.buttonL = inputs.lightshield; // Map
+    outputs.x = inputs.a || inputs.c_up || inputs.c_left || inputs.c_right || inputs.c_down; // Attack
+    outputs.b = inputs.b; // Cancel
+    outputs.a = inputs.x; // Jump
+    outputs.y = inputs.mod_y; // Spell
+    
+    outputs.triggerLDigital = inputs.lightshield; // Focus/cast
+    outputs.triggerRDigital = inputs.mod_x;
+
+    //outputs.buttonR = inputs.up; // Dream nail // This is not Dream nail
+    outputs.buttonR = inputs.z; // Dash
+
+    outputs.buttonL = inputs.r; // Map
     outputs.select = inputs.midshield; // Inventory
     outputs.start = inputs.start; // Pause
 }
 
 void HollowKnight::UpdateAnalogOutputs(InputState &inputs, OutputState &outputs) {
     UpdateDirections(
-        inputs.left,
-        inputs.right,
-        inputs.down,
-        inputs.mod_x,
+        (inputs.left || inputs.c_left) && !inputs.c_right,
+        (inputs.right || inputs.c_right) && !inputs.c_left,
+        (inputs.down || inputs.c_down) && !inputs.c_up,
+        (inputs.up || inputs.c_up) && !inputs.c_down,
         inputs.c_left,
         inputs.c_right,
         inputs.c_down,
